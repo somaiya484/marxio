@@ -1,7 +1,7 @@
-export default function page(){
+export default function page() {
     return (
-        <main>
-            h1
+        <main className="p-5">
+            <h1>Dashboard</h1>
         </main>
     )
 }
