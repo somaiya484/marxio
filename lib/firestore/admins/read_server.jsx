@@ -1,8 +1,8 @@
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 
-export const getCategory = async ({ id }) => {
-    const data = await getDoc(doc(db, `categories/${id}`));
+export const getAdmin = async ({ id }) => {
+    const data = await getDoc(doc(db, `admins/${id}`));
     if (data.exists()) {
         return data.data();
     } else {
@@ -10,7 +10,7 @@ export const getCategory = async ({ id }) => {
     }
 };
 
-// export const getCategories = async () => {
-//     const list = await getDocs(collection(db, "categories"));
+// export const getBrands = async () => {
+//     const list = await getDocs(collection(db, "brands"));
 //     return list.docs.map((snap) => snap.data());
 // };

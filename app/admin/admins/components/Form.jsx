@@ -1,7 +1,7 @@
 "use client";
 
-import { getBrand } from "@/lib/firestore/brands/read_server";
-import { createNewBrand, updateBrands } from "@/lib/firestore/brands/write";
+import { getAdmin } from "@/lib/firestore/admins/read_server";
+import { createNewAdmin, updateAdmin } from "@/lib/firestore/admins/write";
 import { Button } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,9 +19,9 @@ export default function Form() {
 
     const fetchData = async () => {
         try {
-            const res = await getBrand({ id: id });
+            const res = await getAdmin({ id: id });
             if (!res) {
-                toast.error("Brand Not Found!");
+                toast.error("Admin Not Found!");
             } else {
                 setData(res);
             }
@@ -48,7 +48,7 @@ export default function Form() {
     const handleCreate = async () => {
         setIsLoading(true);
         try {
-            await createNewBrand({ data: data, image: image });
+            await createNewAdmin({ data: data, image: image });
             toast.success("Successfully Created");
             setData(null);
             setImage(null);
@@ -61,11 +61,11 @@ export default function Form() {
     const handleUpdate = async () => {
         setIsLoading(true);
         try {
-            await updateBrands({ data: data, image: image });
+            await updateAdmin({ data: data, image: image });
             toast.success("Successfully Updated");
             setData(null);
             setImage(null);
-            router.push(`/admin/brands`);
+            router.push(`/admin/admins`);
         } catch (error) {
             toast.error(error?.message);
         }
@@ -74,7 +74,7 @@ export default function Form() {
 
     return (
         <div className="flex flex-col gap-3 bg-white rounded-xl p-5 w-full md:w-[400px]">
-            <h1 className="font-semibold">{id ? "Update" : "Create"} Brands</h1>
+            <h1 className="font-semibold">{id ? "Update" : "Create"} Admins</h1>
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -87,7 +87,7 @@ export default function Form() {
                 className="flex flex-col gap-3"
             >
                 <div className="flex flex-col gap-1">
-                    <label htmlFor="brand-name" className="text-gray-500 text-sm">
+                    <label htmlFor="admin-name" className="text-gray-500 text-sm">
                         Image <span className="text-red-500">*</span>{" "}
                     </label>
                     {image && (
@@ -101,24 +101,42 @@ export default function Form() {
                                 setImage(e.target.files[0]);
                             }
                         }}
-                        id="brand-image"
-                        name="brand-image"
+                        id="admin-image"
+                        name="admin-image"
                         type="file"
                         className="border px-4 py-2 rounded-lg w-full"
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <label htmlFor="brand-name" className="text-gray-500 text-sm">
+                    <label htmlFor="admin-name" className="text-gray-500 text-sm">
                         Name <span className="text-red-500">*</span>{" "}
                     </label>
                     <input
-                        id="brand-name"
-                        name="brand-name"
+                        id="admin-name"
+                        name="admin-name"
                         type="text"
                         placeholder="Enter Name"
                         value={data?.name ?? ""}
                         onChange={(e) => {
                             handleData("name", e.target.value);
+                        }}
+                        className="border px-4 py-2 rounded-lg w-full focus:outline-none"
+                        required
+                    />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                    <label htmlFor="admin-email" className="text-gray-500 text-sm">
+                        Email <span className="text-red-500">*</span>{" "}
+                    </label>
+                    <input
+                        id="admin-email"
+                        name="admin-email"
+                        type="email"
+                        placeholder="Enter email"
+                        value={data?.email ?? ""}
+                        onChange={(e) => {
+                            handleData("email", e.target.value);
                         }}
                         className="border px-4 py-2 rounded-lg w-full focus:outline-none"
                     />
