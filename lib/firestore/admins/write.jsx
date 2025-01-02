@@ -1,83 +1,42 @@
-import { db, storage } from "@/lib/firebase";
-import {
-    collection,
-    deleteDoc,
-    doc,
-    setDoc,
-    Timestamp,
-    updateDoc,
-} from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+"use client";
 
-export const createNewAdmin = async ({ data, image }) => {
-    if (!image) {
-        throw new Error("Image is Required");
-    }
-    if (!data?.name) {
-        throw new Error("Name is required");
-    }
-    if (!data?.email) {
-        throw new Error("Email is required");
-    }
+import { db } from "@/lib/firebase";
+import { collection, doc, onSnapshot } from "firebase/firestore";
+import useSWRSubscription from "swr/subscription";
 
-    const newId = data?.email;
-    const imageRef = ref(storage, `admins/${newId}`);
-    await uploadBytes(imageRef, image);
-    const imageURL = await getDownloadURL(imageRef);
-
-    await setDoc(doc(db, `admins/${newId}`), {
-        ...data,
-        id: newId,
-        imageURL: imageURL,
-        timestampCreate: Timestamp.now(),
+export function useAdmins() {
+    const { data, error } = useSWRSubscription(["admins"], ([path], { next }) => {
+        const ref = collection(db, path);
+        const unsub = onSnapshot(
+            ref,
+            (snapshot) =>
+                next(
+                    null,
+                    snapshot.docs.length === 0
+                        ? null
+                        : snapshot.docs.map((snap) => snap.data())
+                ),
+            (err) => next(err, null)
+        );
+        return () => unsub();
     });
-};
 
-export const updateAdmin = async ({ data, image }) => {
-    if (!data?.name) {
-        throw new Error("Name is required");
-    }
-    if (!data?.id) {
-        throw new Error("ID is required");
-    }
-    if (!data?.email) {
-        throw new Error("Email is required");
-    }
-    const id = data?.id;
+    return { data, error: error?.message, isLoading: data === undefined };
+}
 
-    let imageURL = data?.imageURL;
+export function useAdmin({ email }) {
+    const { data, error } = useSWRSubscription(
+        ["admins", email],
+        ([path, email], { next }) => {
+            const ref = doc(db, `admins/${email}`);
+            const unsub = onSnapshot(
+                ref,
+                (snapshot) => next(null, snapshot.exists() ? snapshot.data() : null),
+                (err) => next(err, null)
+            );
+            return () => unsub();
+        }
+    );
 
-    if (image) {
-        const imageRef = ref(storage, `admins/${id}`);
-        await uploadBytes(imageRef, image);
-        imageURL = await getDownloadURL(imageRef);
-    }
-
-    if (id === data?.emaill) {
-        await updateDoc(doc(db, `admins/${id}`), {
-            ...data,
-            imageURL: imageURL,
-            timestampUpdate: Timestamp.now(),
-        });
-    } else{
-        const newId = data?.emaill;
-
-        await deleteDoc(doc(db, `admins/${id}`));
-
-        await setDoc(doc(db, `admins/${newId}`), {
-            ...data,
-            id: newId,
-            imageURL: imageURL,
-            timestampUpdate: Timestamp.now(),
-        });
-    }
-
-
-};
-
-export const deleteAdmins = async ({ id }) => {
-    if (!id) {
-        throw new Error("ID is required");
-    }
-    await deleteDoc(doc(db, `admins/${id}`));
-};
+    return { data, error: error?.message, isLoading: data === undefined };
+}

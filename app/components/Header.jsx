@@ -23,9 +23,9 @@ export default function Header () {
 
             <div className="flex gap-4 items-center font-semibold">
                 {
-                    menuList?.map((item) =>{
+                    menuList?.map((item, key) =>{
                         return (
-                            <Link href={item?.link}>
+                            <Link key={key} href={item?.link}>
                             <button>{item.name}</button>
                             </Link>
                         )
